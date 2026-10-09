@@ -4,7 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hello</title>
+  <script>
+    // Apply the saved or system theme before first paint to avoid a flash.
+    (() => {
+      let theme;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (!theme) {
+        theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <style>
+    :root {
+      --bg: #f8f9fa;
+      --text: #222;
+      --btn-bg: #222;
+      --btn-text: #fff;
+      --btn-hover: #444;
+    }
+    :root[data-theme="dark"] {
+      --bg: #121212;
+      --text: #eee;
+      --btn-bg: #eee;
+      --btn-text: #121212;
+      --btn-hover: #ccc;
+    }
     body {
       margin: 0;
       min-height: 100vh;
@@ -14,7 +39,9 @@
       justify-content: center;
       gap: 1.5rem;
       font-family: system-ui, -apple-system, sans-serif;
-      background: #f8f9fa;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
     }
     h1 {
       font-size: 4rem;
@@ -26,18 +53,24 @@
       padding: 0.6rem 1.2rem;
       border: none;
       border-radius: 6px;
-      background: #222;
-      color: #fff;
+      background: var(--btn-bg);
+      color: var(--btn-text);
       cursor: pointer;
     }
     button:hover {
-      background: #444;
+      background: var(--btn-hover);
+    }
+    #theme-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
     }
   </style>
 </head>
 <body>
   <h1 id="greeting">Hello</h1>
   <button id="color-btn">Change color</button>
+  <button id="theme-btn"></button>
 
   <script>
     const colors = ["#e63946", "#2a9d8f", "#e9c46a", "#457b9d", "#9b5de5"];
@@ -46,6 +79,20 @@
     document.getElementById("color-btn").addEventListener("click", () => {
       document.getElementById("greeting").style.color = colors[index];
       index = (index + 1) % colors.length;
+    });
+
+    const themeBtn = document.getElementById("theme-btn");
+    const updateThemeLabel = () => {
+      const dark = document.documentElement.dataset.theme === "dark";
+      themeBtn.textContent = dark ? "Light mode" : "Dark mode";
+    };
+    updateThemeLabel();
+
+    themeBtn.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem("theme", next); } catch (e) {}
+      updateThemeLabel();
     });
   </script>
 </body>
